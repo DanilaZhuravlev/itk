@@ -1,13 +1,40 @@
+import functools
+import collections
 import unittest.mock
-from functools import lru_cache
+
+def lru_cache(maxsize=128):
+    """ Декоратор для реализации LRU-кэша """
+    def decorator(func):
+        cache = collections.OrderedDict()
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            key = (args, frozenset(kwargs.items()))
+
+            if key in cache:
+                cache.move_to_end(key)
+                return cache[key]
+
+            result = func(*args, **kwargs)
+
+            cache[key] = result
+
+            if len(cache) > maxsize:
+                cache.popitem(last=False)
+
+            return result
+
+        return wrapper
+
+    return decorator
 
 
-@lru_cache
+@lru_cache()
 def sum(a: int, b: int) -> int:
     return a + b
 
 
-@lru_cache
+@lru_cache()
 def sum_many(a: int, b: int, *, c: int, d: int) -> int:
     return a + b + c + d
 
@@ -37,7 +64,6 @@ if __name__ == '__main__':
     assert decorated(5, 6) == 3
     assert decorated(5, 6) == 3
     assert decorated(1, 2) == 4
+
     assert mocked_func.call_count == 4
-
-    print("Все тесты успешно пройдены!")
-
+    print('Все тесты пройдены!')
