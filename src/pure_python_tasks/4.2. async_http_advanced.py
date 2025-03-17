@@ -61,7 +61,7 @@ async def fetch_urls(urls_file_path: str, results_file_path: str) -> dict:
     return contents
 
 async def main():
-    urls_file = 'urls.txt'
+    urls_file = '../urls.txt'
     results_file = 'result.jsonl'
     results_dict = await fetch_urls(urls_file, results_file)
     print("Словарь результатов:", results_dict)
